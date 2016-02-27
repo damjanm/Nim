@@ -5,8 +5,6 @@ Pri igri Nim je igralna plošča sestavljena iz več vrstic. V vsaki vrstici so 
 
 Vsebinski načrt:
 
-Uporabniški vmesnik:
-
 Na sredini okna bo igralna plošča, katera bo imela več vrstic z vžigalicami. Nad igralno ploščo bosta gumb za novo igro in gumb za razveljaviti zadnjo potezo (undo). V desnem kotu bo  napisano kdo je na potezi.  Desno od igralne plošče bo za izbirati, kako želiš igrati novo igro (računalnik- računalnik, človek- računalnik, človek-človek), kdo začne in težavnost (računalnik bo izbral število vrstic in vžigalic, glede na izbrano težavnost). 
 
 Za igralno ploščo bova uporabila podatkovno strukturo matriko. V matriki bo v vsakem trenutku napisano trenutno stanje igre (kje so še vedno vžigalice). Ko bo računalnik izbral število vrstic in vžigalic, se bo ustvarila matrika velikosti št. vrstic krat max. št. vžigalic v vrstici. 
