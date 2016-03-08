@@ -111,7 +111,7 @@ class upvmesnik():
 
         game_menu = Menu(menu)
         menu.add_cascade(label="Igra", menu=game_menu)
-        game_menu.add_command(label="Nova igra", command=self.new_game)
+        game_menu.add_command(label="Nova igra", command=self.start_game)
         game_menu.add_command(label="Izhod iz igre", command=self.quit)
         
         player_menu = Menu(menu)
