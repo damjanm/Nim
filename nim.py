@@ -7,8 +7,8 @@ st_vrstic = 4
 st_vzigalic_po_vrsticah = [1,3,5,7] # Zaenkrat so konstante, kasneje bodo spremenljivke
 
 #igralci:
-igralec_i = "1"
-igralec_ii = "2"
+igralec_i = "Človek 1"
+igralec_ii = "Človek 2"
 
 ni_konec = "ni konec"
 
@@ -31,13 +31,12 @@ def nasprotnik(igralec):
 
 class Igra():
     def __init__(self):
-        self.plosca=st_vzigalic_po_vrsticah
+        self.plosca=st_vzigalic_po_vrsticah[:]
         self.na_potezi =  igralec_i
         self.zgodovina = [] # Zgodovino bomo rabili, da bi shranjevali kateri igralec je naredil ustrezno potezo.
         
     def shrani_pozicijo(self):
-        q = [self.plosca[i] for i in range(len(self.plosca))] # Shranimo trenutno self.plosca
-        self.zgodovina.append((q,self.na_potezi)) # Shranimo q in ne self.plosca, ker se self.plosca ves cas spreminja
+        self.zgodovina.append((self.plosca[:],self.na_potezi)) # Shranimo q in ne self.plosca, ker se self.plosca ves cas spreminja
         
     def razveljavi(self):
         (self.plosca, self.na_potezi) = self.zgodovina.pop()
@@ -46,20 +45,20 @@ class Igra():
         # Vrne nam seznam z vsemi moznimi potezi na vsaki vrstici
         poteze = []
         for i in range(len(self.plosca)):
-            poteze.append([list(range(1, 1 + self.plosca[i])),i])
+            poteze.append([list(range(self.plosca[i])),i])
         return poteze
 
     def povleci_potezo(self,i,j):
-        # Igralec bo vzel j vzigalic iz i-te vrstice
+        # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
         if j not in self.veljavne_poteze()[i][0]:
             return None
         else:
             self.shrani_pozicijo()
-            self.plosca[i] -= j
+            self.plosca[i] = j
             if self.stanje_igre() == ni_konec:
                 self.na_potezi = nasprotnik(self.na_potezi)
             return(self.stanje_igre())
-            
+           
     def stanje_igre(self):
         """Ugotovi, kakšno je stanje in vrne:
         -igralec_i, ce je zmagal prvi igralec
@@ -79,8 +78,9 @@ class Igra():
 ## Igralec človek
             
 class Clovek():
-    def __init__(self, gui):
+    def __init__(self, gui,ime):
         self.gui = gui
+        self.ime = ime
 
     def igraj(self):
         pass
@@ -93,8 +93,9 @@ class Clovek():
 ## Igralec računalnik
 
 class PC():
-    def __init__(self, gui, algoritem):
+    def __init__(self, gui, ime, algoritem):
         self.gui = gui
+        self.ime= ime
         self.algoritem = algoritem
 
     def klik(self, p):
@@ -111,22 +112,22 @@ class upvmesnik():
 
         game_menu = Menu(menu)
         menu.add_cascade(label="Igra", menu=game_menu)
-        game_menu.add_command(label="Nova igra", command=self.start_game)
-        game_menu.add_command(label="Izhod iz igre", command=self.quit)
+        game_menu.add_command(label="Nova igra", command=lambda:self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2")))
         
         player_menu = Menu(menu)
         menu.add_cascade(label="Igralca", menu=player_menu)
-        player_menu.add_command(label="Človek proti človeku", command=self.start_game(clovek,clovek))
-        player_menu.add_command(label="Človek proti računalniku", command=self.start_game(clovek,pc))
-        player_menu.add_command(label="Računalnik proti človeku", command=self.start_game(pc,clovek))
-        player_menu.add_command(label="Računalnik proti računalniku", command=self.start_game(pc,pc))
+        player_menu.add_command(label="Človek proti človeku", command=lambda:self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2")))
+        player_menu.add_command(label="Človek proti računalniku", command=lambda:self.start_game(Clovek(self,"Clovek"),PC(self,"Racunalnik")))
+        player_menu.add_command(label="Računalnik proti človeku", command=lambda:self.start_game(PC(self,"Racunalnik"),Clovek(self,"Clovek")))
+        player_menu.add_command(label="Računalnik proti računalniku", command=lambda:self.start_game(PC(self,"Racunalnik 1"),PC(self,"Racunalnik 2")))
 
         # Napis, ki prikazuje stanje igre
         self.napis = StringVar(master, value="Dobrodošli v igri Nim")
         Label(master, textvariable=self.napis).grid(row=0, column=0)
 
         # Ustvarimo igralno ploščo
-        self.plosca = Canvas(master, width = 150*max(st_vzigalic_po_vrsticah), height = 150*st_vrstic)
+        self.plosca = Canvas(master, width = 50*max(st_vzigalic_po_vrsticah)+50, height = 100*st_vrstic+50)
+        self.plosca.grid()
 
         
         # Igranje človeka bo upravljano s klikom
@@ -137,44 +138,59 @@ class upvmesnik():
 
     def start_game(self, igralec_i, igralec_ii):
         # Pobrišemo platno
-        self.plosca.delete(ALL)
-
+        #self.plosca.delete(ALL)
+        m=0
+        sez1=list()
         # Narišemo vžigalice
-        for i in matrika:
+        for i in range(st_vrstic):
             k=0
-            for j in matrika[i]:
-                if j==1:
-                    self.plosca.create_line(50+k,50*i,50+k,100*i)
-                    k+=100
-                else:
-                    k+=100
+            sez2=list()
+            for j in range(1,1+st_vzigalic_po_vrsticah[i]):
+                i1=self.plosca.create_line(50+k,50*(i+1)+m,50+k,50*(i+1)+m+50)
+                sez2.append(i1) #shranjujemo id vžigalic
+                k+=50
+            m+=50
+            sez1.append(sez2)
+        self.seznam=sez1    
         
         # Ustvarimo novo igro
         self.igra=Igra()
         
         # Nastavimo igralca
-        self.prvi = igralec_i
-        self.drugi = igralec_ii
+        self.prvi = Clovek(self,"Človek 1")
+        self.drugi = Clovek(self, "Človek 2")
 
         # Človek je prvi na potezi
-        self.napis.set("Na potezi je {0}".format(prvi))
+        self.napis.set("Na potezi je {0}".format(self.prvi.ime)) # popravi še, da se spreminja kdo je na potezi
         self.prvi.igraj()
 
     def izvrsi_potezo(self, i, j):
-        # Igralec bo vzel j vzigalic iz i-te vrstice
-        if j in Igra.veljavne_poteze()[i][0]:
-            k = sum(matrika[i])
-            matrika[i] = [1]*(k-j) + [0]*(max(st_vzigalic_po_vrsticah)-(k-j))
-            l = matrika[i]
-            for m in range(k,l):
-                self.plosca.delete(50+k,50*i,50+k,100*i)
-        else:
-            continue
-
+        # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
+        for a in self.seznam[i][j:]:
+            self.plosca.delete(a)
+        self.seznam[i] = self.seznam[i][:j]         
+        self.igra.povleci_potezo(i,j)
+        if self.igra.zgodovina!=[]:
+            self.napis.set("Na potezi je {0}".format(nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1])))
         
-    def end_game(self, winner):
-        self.napis.set("Zmagal je {0}".format(winner))
+    def plosca_klik(self, event):
+        vzigalica = (event.x+5)//50 -1 
+        vrstica = (event.y-5)//100
+        if 5<event.y%100<45:
+            return
+        if 5<event.x%50<45:
+            return        
+        if vrstica <0 or vrstica >=st_vrstic:
+            return
+        if vzigalica <0 or vzigalica >= self.igra.plosca[vrstica]:
+            return
+#        print(vrstica, vzigalica)
+        self.izvrsi_potezo(vrstica,vzigalica)
+        
     
+    def end_game(self,winner):
+        self.napis.set("Zmagal je {0}".format(winner))
+
 
 
 root = Tk()
