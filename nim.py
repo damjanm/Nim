@@ -161,7 +161,7 @@ class upvmesnik():
         self.drugi = Clovek(self, "Človek 2")
 
         # Človek je prvi na potezi
-        self.napis.set("Na potezi je {0}".format(self.prvi.ime)) # popravi še, da se spreminja kdo je na potezi
+        self.napis.set("Na potezi je {0}".format(self.prvi.ime))
         self.prvi.igraj()
 
     def izvrsi_potezo(self, i, j):
@@ -172,6 +172,12 @@ class upvmesnik():
         self.igra.povleci_potezo(i,j)
         if self.igra.zgodovina!=[]:
             self.napis.set("Na potezi je {0}".format(nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1])))
+        
+        if self.igra.stanje_igre()!=ni_konec:
+            self.end_game(self.igra.stanje_igre())
+        else:
+            pass
+
         
     def plosca_klik(self, event):
         vzigalica = (event.x+5)//50 -1 
@@ -184,7 +190,6 @@ class upvmesnik():
             return
         if vzigalica <0 or vzigalica >= self.igra.plosca[vrstica]:
             return
-#        print(vrstica, vzigalica)
         self.izvrsi_potezo(vrstica,vzigalica)
         
     
