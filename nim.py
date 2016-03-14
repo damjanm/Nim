@@ -45,11 +45,11 @@ class Igra():
 
     def povleci_potezo(self,i,j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        if (j-1) not in self.veljavne_poteze()[i][1]:
+        if j not in self.veljavne_poteze()[i][1]:
             return None
         else:
             self.shrani_pozicijo()
-            self.plosca[i] = j-1
+            self.plosca[i] = j
             if self.stanje_igre() == ni_konec:
                 self.na_potezi = nasprotnik(self.na_potezi)
             return(self.stanje_igre())
