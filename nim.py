@@ -45,16 +45,16 @@ class Igra():
         # Vrne nam seznam z vsemi moznimi potezi na vsaki vrstici
         poteze = []
         for i in range(len(self.plosca)):
-            poteze.append([list(range(self.plosca[i])),i])
+            poteze.append([i,list(range(self.plosca[i]))]) 
         return poteze
 
     def povleci_potezo(self,i,j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        if j not in self.veljavne_poteze()[i][0]:
+        if (j-1) not in self.veljavne_poteze()[i][1]:
             return None
         else:
             self.shrani_pozicijo()
-            self.plosca[i] = j
+            self.plosca[i] = j-1
             if self.stanje_igre() == ni_konec:
                 self.na_potezi = nasprotnik(self.na_potezi)
             return(self.stanje_igre())
@@ -97,7 +97,15 @@ class PC():
         self.gui = gui
         self.ime= ime
         self.algoritem = algoritem
-
+    def igraj(self):
+        #poiscemo neprazno vrstico in jo shranimo kot q:
+        q=0
+        for i in range(st_vrstic):
+            if self.gui.igra.veljavne_poteze()[i][1]!=[]:
+                q=i
+        (i,j) = self.gui.igra.veljavne_poteze()[q]
+        self.gui.povleci_potezo(i,j[0]+1)
+        
     def klik(self, p):
         pass # Računalnik bo ignoriral klike
 
