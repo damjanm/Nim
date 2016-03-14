@@ -17,11 +17,6 @@ clovek = "človek"
 pc = "računalnik"
 
 
-# Seznam dolžine 4 x 7 (v tem primeru), ki vsebuje enke in nicle, torej stevilo enk nam pove koliko vzigalic imamo v posamezni vrstici:
-matrika=list()
-for i in range(st_vrstic):
-    matrika.append([1]*st_vzigalic_po_vrsticah[i] + [0]*(max(st_vzigalic_po_vrsticah) - st_vzigalic_po_vrsticah[i]))
-    
 
 def nasprotnik(igralec):
     if igralec == igralec_i:
