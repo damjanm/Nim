@@ -91,16 +91,49 @@ class PC():
     def __init__(self, gui, ime, algoritem):
         self.gui = gui
         self.ime= ime
-        self.algoritem = algoritem
-    def igraj(self):
-        #poiscemo neprazno vrstico in jo shranimo kot q:
-        q=0
-        for i in range(st_vrstic):
-            if self.gui.igra.veljavne_poteze()[i][1]!=[]:
-                q=i
-        (i,j) = self.gui.igra.veljavne_poteze()[q]
-        self.gui.povleci_potezo(i,j[0]+1)
         
+    def igraj(self):        
+        self.gui.izvrsi_potezo(self.strategija()[0],self.strategija()[1])
+
+    def strategija(self):
+        """Vrni seznam z vrstico iz katere bomo vzeli vse vzigalice od vzig desno"""
+        
+        # Najprej naredimo operacijo XOR (exlusive or) po vseh stevilah vzigalic in rezultat shranimo kot xor:        
+        xor=self.gui.igra.plosca[0]
+        for i in self.gui.igra.plosca[1:]:
+            xor = xor^i
+            
+        # Naredimo ustrezno strategijo v odvisnosti od xor:
+        if xor == 0:
+            vrst = self.gui.igra.plosca.index(max(self.gui.igra.plosca))
+            vzig = self.gui.igra.plosca[vrst]-1
+        else:        
+            for i,j in enumerate(self.gui.igra.plosca):
+                if j^xor < j:
+                    vrst = i
+            vzig = self.gui.igra.plosca[vrst]^xor
+            
+            #S tem smo dolocili vrstico iz katere moramo vzeti ustrezno stevilo vzigalic.
+            #Sedaj še popravimo strategijo v primeru, ko imamo po eno vžigalico v vsaki vrstici (ali pa je v maksimum eno vrstico več kot 1 vžigalica).
+            #Naredimo tak korak, da bo ostalo liho število vrstic, kjer vsaka vrstica bo imela 1 vžigalico
+            
+            st=0
+            for i,j in enumerate(self.gui.igra.plosca):
+                if vrst == i:
+                    kk = vzig
+                else:
+                    kk = j
+                if kk>1:
+                    st+=1
+            if st == 0:
+                vrst = self.gui.igra.plosca.index(max(self.gui.igra.plosca))
+                st_enk = sum(i==1 for i in self.gui.igra.plosca)
+                if st_enk%2!=1:
+                    vzig = 1
+                else:
+                    vzig = 0    
+        return [vrst,vzig] 
+            
     def klik(self, p):
         pass # Računalnik bo ignoriral klike
 
