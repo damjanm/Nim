@@ -18,16 +18,13 @@ pc = "računalnik"
 
 
 
-def nasprotnik(igralec):
-    if igralec == igralec_i:
-        return igralec_ii
-    else:
-        return igralec_i
 
 class Igra():
-    def __init__(self):
+    def __init__(self,igralec_1,igralec_2):
         self.plosca=st_vzigalic_po_vrsticah[:]
-        self.na_potezi =  igralec_i
+        self.na_potezi =  igralec_1
+        self.igralec_1 =  igralec_1
+        self.igralec_2 =  igralec_2
         self.zgodovina = [] # Zgodovino bomo rabili, da bi shranjevali kateri igralec je naredil ustrezno potezo.
         
     def shrani_pozicijo(self):
@@ -35,6 +32,12 @@ class Igra():
         
     def razveljavi(self):
         (self.plosca, self.na_potezi) = self.zgodovina.pop()
+
+    def nasprotnik(self,igralec):
+        if igralec == self.igralec_1:
+            return self.igralec_2
+        else:
+            return self.igralec_1
 
     def veljavne_poteze(self):
         # Vrne nam seznam z vsemi moznimi potezi na vsaki vrstici
@@ -51,7 +54,7 @@ class Igra():
             self.shrani_pozicijo()
             self.plosca[i] = j
             if self.stanje_igre() == ni_konec:
-                self.na_potezi = nasprotnik(self.na_potezi)
+                self.na_potezi = self.nasprotnik(self.na_potezi)
             return(self.stanje_igre())
            
     def stanje_igre(self):
@@ -81,14 +84,14 @@ class Clovek():
         pass
 
     def klik(self, i, j):
-        self.gui.povleci_potezo(i, j)
+        self.gui.izvrsi_potezo(i, j)
 
 
 ##################################################################
 ## Igralec računalnik
 
 class PC():
-    def __init__(self, gui, ime, algoritem):
+    def __init__(self, gui, ime):
         self.gui = gui
         self.ime= ime
         
@@ -134,7 +137,7 @@ class PC():
                     vzig = 0    
         return [vrst,vzig] 
             
-    def klik(self, p):
+    def klik(self, i,j):
         pass # Računalnik bo ignoriral klike
 
 ##################################################################
@@ -169,10 +172,10 @@ class upvmesnik():
         # Igranje človeka bo upravljano s klikom
         self.plosca.bind("<Button-1>", self.plosca_klik)
 
-        # Začne igro v načinu človek proti računalniku
-        self.start_game(clovek,pc)
+        # Začne igro v načinu človek proti človeku
+        self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
 
-    def start_game(self, igralec_i, igralec_ii):
+    def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
         #self.plosca.delete(ALL)
         m=0
@@ -190,27 +193,31 @@ class upvmesnik():
         self.seznam=sez1    
         
         # Ustvarimo novo igro
-        self.igra=Igra()
+        self.igra=Igra(igralec_1,igralec_2)
         
         # Nastavimo igralca
-        self.prvi = Clovek(self,"Človek 1")
-        self.drugi = Clovek(self, "Človek 2")
+        self.prvi = igralec_1
+        self.drugi = igralec_2
 
         # Človek je prvi na potezi
         self.napis.set("Na potezi je {0}".format(self.prvi.ime))
+        #self.igralec= self.prvi
         self.prvi.igraj()
 
     def izvrsi_potezo(self, i, j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        for a in self.seznam[i][j:]:
+        for a in self.seznam[i][j:]: 
             self.plosca.delete(a)
         self.seznam[i] = self.seznam[i][:j]         
         self.igra.povleci_potezo(i,j)
-        if self.igra.zgodovina!=[]:
-            self.napis.set("Na potezi je {0}".format(nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1])))
-        
+        if self.igra.na_potezi==self.prvi:
+            self.prvi.igraj()
+        else:
+            self.drugi.igraj()
+        self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
+
         if self.igra.stanje_igre()!=ni_konec:
-            self.end_game(self.igra.stanje_igre())
+            self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
         else:
             pass
 
@@ -226,7 +233,12 @@ class upvmesnik():
             return
         if vzigalica <0 or vzigalica >= self.igra.plosca[vrstica]:
             return
-        self.izvrsi_potezo(vrstica,vzigalica)
+        
+        if self.igra.na_potezi==self.prvi:
+            self.prvi.klik(vrstica,vzigalica)
+        else:
+            self.drugi.klik(vrstica,vzigalica)
+        
         
     
     def end_game(self,winner):
