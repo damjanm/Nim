@@ -3,8 +3,8 @@ from tkinter import *
 ##################################################################
 ## Igra
 
-st_vrstic = 4 
-st_vzigalic_po_vrsticah = [1,3,5,7] # Zaenkrat so konstante, kasneje bodo spremenljivke
+st_vzigalic_po_vrsticah = [1,3,5,7]
+st_vrstic = len(st_vzigalic_po_vrsticah)
 
 #igralci:
 igralec_i = "Človek 1"
@@ -181,16 +181,17 @@ class upvmesnik():
         m=0
         sez1=list()
         # Narišemo vžigalice
+        sredina=(max(st_vzigalic_po_vrsticah)+1)//2
         for i in range(st_vrstic):
             k=0
             sez2=list()
-            for j in range(1,1+st_vzigalic_po_vrsticah[i]):
-                i1=self.plosca.create_line(50+k,50*(i+1)+m,50+k,50*(i+1)+m+50)
-                sez2.append(i1) #shranjujemo id vžigalic
+            for j in range(st_vzigalic_po_vrsticah[i]):
+                i1=self.plosca.create_line(k+50*(sredina-i-min(st_vzigalic_po_vrsticah)//2),50*(i+1)+m,k+50*(sredina-i-min(st_vzigalic_po_vrsticah)//2),50*(i+1)+m+50)
+                sez2.append(i1)
                 k+=50
             m+=50
             sez1.append(sez2)
-        self.seznam=sez1    
+        self.seznam=sez1   
         
         # Ustvarimo novo igro
         self.igra=Igra(igralec_1,igralec_2)
@@ -223,11 +224,11 @@ class upvmesnik():
 
         
     def plosca_klik(self, event):
-        vzigalica = (event.x+5)//50 -1 
         vrstica = (event.y-5)//100
+        vzigalica = (event.x+5-50*(4-vrstica))//50 
         if 5<event.y%100<45:
             return
-        if 5<event.x%50<45:
+        if 5<(event.x-50*(4-vrstica))%50<45:
             return        
         if vrstica <0 or vrstica >=st_vrstic:
             return
