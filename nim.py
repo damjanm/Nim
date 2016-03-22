@@ -177,7 +177,7 @@ class upvmesnik():
 
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
-        #self.plosca.delete(ALL)
+        self.plosca.delete(ALL)
         m=0
         sez1=list()
         # Narišemo vžigalice
