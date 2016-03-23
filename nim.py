@@ -1,5 +1,6 @@
 from tkinter import *
 
+
 ##################################################################
 ## Igra
 
@@ -85,6 +86,7 @@ class Clovek():
 
     def klik(self, i, j):
         self.gui.izvrsi_potezo(i, j)
+        
 
 
 ##################################################################
@@ -95,11 +97,15 @@ class PC():
         self.gui = gui
         self.ime= ime
         
-    def igraj(self):        
-        self.gui.izvrsi_potezo(self.strategija()[0],self.strategija()[1])
-
+    def igraj(self):
+        
+        a=self.strategija()        
+        #print(a,self.ime)
+        self.gui.izvrsi_potezo(a[0],a[1])
+        
     def strategija(self):
         """Vrni seznam z vrstico iz katere bomo vzeli vse vzigalice od vzig desno"""
+
         
         # Najprej naredimo operacijo XOR (exlusive or) po vseh stevilah vzigalic in rezultat shranimo kot xor:        
         xor=self.gui.igra.plosca[0]
@@ -148,17 +154,17 @@ class upvmesnik():
     def __init__(self,master):
         menu = Menu(master)
         master.config(menu=menu) # Dodamo glavni meni
-
-        game_menu = Menu(menu)
-        menu.add_cascade(label="Igra", menu=game_menu)
-        game_menu.add_command(label="Nova igra", command=lambda:self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2")))
+        self.ime_c1 = "Clovek 1"
+        self.ime_c2 = "Clovek 2"
+        self.ime_pc1 = "Računalnik 1"
+        self.ime_pc2 = "Računalnik 2"
         
         player_menu = Menu(menu)
-        menu.add_cascade(label="Igralca", menu=player_menu)
-        player_menu.add_command(label="Človek proti človeku", command=lambda:self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2")))
-        player_menu.add_command(label="Človek proti računalniku", command=lambda:self.start_game(Clovek(self,"Clovek"),PC(self,"Racunalnik")))
-        player_menu.add_command(label="Računalnik proti človeku", command=lambda:self.start_game(PC(self,"Racunalnik"),Clovek(self,"Clovek")))
-        player_menu.add_command(label="Računalnik proti računalniku", command=lambda:self.start_game(PC(self,"Racunalnik 1"),PC(self,"Racunalnik 2")))
+        menu.add_cascade(label="Igra", menu=player_menu)
+        player_menu.add_command(label="Človek proti človeku", command=lambda:self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2)))
+        player_menu.add_command(label="Človek proti računalniku", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2)))
+        player_menu.add_command(label="Računalnik proti človeku", command=lambda:self.start_game(PC(self,self.ime_pc1),Clovek(self,self.ime_c2)))
+        player_menu.add_command(label="Računalnik proti računalniku", command=lambda:self.start_game(PC(self,self.ime_pc1),PC(self,self.ime_pc2)))
 
         # Napis, ki prikazuje stanje igre
         self.napis = StringVar(master, value="Dobrodošli v igri Nim")
@@ -174,7 +180,9 @@ class upvmesnik():
 
         # Začne igro v načinu človek proti človeku
         self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
+        
 
+    
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
         self.plosca.delete(ALL)
@@ -207,20 +215,24 @@ class upvmesnik():
 
     def izvrsi_potezo(self, i, j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        for a in self.seznam[i][j:]: 
-            self.plosca.delete(a)
-        self.seznam[i] = self.seznam[i][:j]         
-        self.igra.povleci_potezo(i,j)
-        if self.igra.na_potezi==self.prvi:
-            self.prvi.igraj()
-        else:
-            self.drugi.igraj()
-        self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
+        if j not in self.igra.veljavne_poteze()[i][1]:
+            return None
+        else:            
+            for a in self.seznam[i][j:]: 
+                self.plosca.delete(a)
+                
+            self.seznam[i] = self.seznam[i][:j]         
+            self.igra.povleci_potezo(i,j)
+            if self.igra.na_potezi==self.prvi:                
+                self.plosca.after(500,self.prvi.igraj)
+            else:
+                self.plosca.after(500, self.drugi.igraj)
+            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
+            if self.igra.stanje_igre()!=ni_konec:
+                self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
+            else:
+                pass
 
-        if self.igra.stanje_igre()!=ni_konec:
-            self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
-        else:
-            pass
 
         
     def plosca_klik(self, event):
@@ -236,7 +248,7 @@ class upvmesnik():
             return
         
         if self.igra.na_potezi==self.prvi:
-            self.prvi.klik(vrstica,vzigalica)
+            self.prvi.klik(vrstica,vzigalica)            
         else:
             self.drugi.klik(vrstica,vzigalica)
         
