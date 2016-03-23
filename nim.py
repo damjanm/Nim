@@ -1,5 +1,5 @@
 from tkinter import *
-
+import tkSimpleDialog
 
 ##################################################################
 ## Igra
@@ -17,6 +17,33 @@ ni_konec = "ni konec"
 clovek = "človek"
 pc = "računalnik"
 
+class MyDialog(tkSimpleDialog.Dialog):
+
+    def body(self, master):
+        
+        Label(master, text="Človek 1:").grid(row=0)
+        Label(master, text="Človek 2").grid(row=1)
+        Label(master, text="Računalnik 1:").grid(row=2)
+        Label(master, text="Računalnik 2:").grid(row=3)
+
+        self.e1 = Entry(master)
+        self.e2 = Entry(master)
+        self.e3 = Entry(master)
+        self.e4 = Entry(master)
+
+        self.e1.grid(row=0, column=1)
+        self.e2.grid(row=1, column=1)
+        self.e3.grid(row=2, column=1)
+        self.e4.grid(row=3, column=1)
+        #return self.e1 # initial focus
+
+    def apply(self):
+        c1 = str(self.e1.get())
+        c2 = str(self.e2.get())
+        pc1 = str(self.e1.get())
+        pc2 = str(self.e2.get())
+        self.names = [c1,c2,pc1,pc2]
+        
 
 
 
@@ -99,8 +126,7 @@ class PC():
         
     def igraj(self):
         
-        a=self.strategija()        
-        #print(a,self.ime)
+        a=self.strategija() 
         self.gui.izvrsi_potezo(a[0],a[1])
         
     def strategija(self):
@@ -152,6 +178,7 @@ class PC():
 class upvmesnik():
     # Meni
     def __init__(self,master):
+        self.master=master
         menu = Menu(master)
         master.config(menu=menu) # Dodamo glavni meni
         self.ime_c1 = "Clovek 1"
@@ -160,11 +187,26 @@ class upvmesnik():
         self.ime_pc2 = "Računalnik 2"
         
         player_menu = Menu(menu)
+        menu_c_pc = Menu(player_menu)
+        menu_pc_c = Menu(player_menu)
+        menu_pc_pc = Menu(player_menu)
+        
         menu.add_cascade(label="Igra", menu=player_menu)
         player_menu.add_command(label="Človek proti človeku", command=lambda:self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2)))
-        player_menu.add_command(label="Človek proti računalniku", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2)))
-        player_menu.add_command(label="Računalnik proti človeku", command=lambda:self.start_game(PC(self,self.ime_pc1),Clovek(self,self.ime_c2)))
-        player_menu.add_command(label="Računalnik proti računalniku", command=lambda:self.start_game(PC(self,self.ime_pc1),PC(self,self.ime_pc2)))
+        player_menu.add_cascade(label="Človek proti računalniku", menu=menu_c_pc)
+        player_menu.add_cascade(label="Računalnik proti človeku", menu=menu_pc_c)
+        player_menu.add_cascade(label="Računalnik proti računalniku", menu=menu_pc_pc)
+
+        menu_c_pc.add_command(label="Težko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2)))
+        menu_pc_c.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1),Clovek(self,self.ime_c2)))
+        menu_pc_pc.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1),PC(self,self.ime_pc2)))
+
+
+        names_menu = Menu(menu)
+        menu.add_cascade(label="Imena igralcev",menu=names_menu)
+        names_menu.add_command(label="Doloci imena igralcev", command=self.imena)
+
+
 
         # Napis, ki prikazuje stanje igre
         self.napis = StringVar(master, value="Dobrodošli v igri Nim")
@@ -180,8 +222,16 @@ class upvmesnik():
 
         # Začne igro v načinu človek proti človeku
         self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
-        
 
+    
+    def imena(self):
+        self.okno=MyDialog(self.master)
+        self.master.wait_window(self.okno)
+        k=self.okno.apply
+        self.ime_c1 = k.names[0]
+        self.ime_c2 = k.names[1]
+        self.ime_pc1 = k.names[2]
+        self.ime_pc2 = k.names[3]
     
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
@@ -189,12 +239,12 @@ class upvmesnik():
         m=0
         sez1=list()
         # Narišemo vžigalice
-        sredina=(max(st_vzigalic_po_vrsticah)+1)//2
+        self.sredina=(max(st_vzigalic_po_vrsticah)+1)//2
         for i in range(st_vrstic):
             k=0
             sez2=list()
             for j in range(st_vzigalic_po_vrsticah[i]):
-                i1=self.plosca.create_line(k+50*(sredina-i-min(st_vzigalic_po_vrsticah)//2),50*(i+1)+m,k+50*(sredina-i-min(st_vzigalic_po_vrsticah)//2),50*(i+1)+m+50)
+                i1=self.plosca.create_rectangle(k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)-2,50*(i+1)+m,k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)+2,50*(i+1)+m+50, fill= "gray")
                 sez2.append(i1)
                 k+=50
             m+=50
@@ -255,7 +305,8 @@ class upvmesnik():
         
     
     def end_game(self,winner):
-        self.napis.set("Zmagal je {0}".format(winner))
+        self.napis.set("")
+        self.plosca.create_text((self.sredina*50), (100+(st_vrstic//2)*50), fill = "blue", font=("Helvetica",30,"bold"), text = "Zmagal je {0}!".format(winner))
 
 
 
