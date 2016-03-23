@@ -1,9 +1,6 @@
 from tkinter import *
-<<<<<<< HEAD
 from random import *
-=======
 import tkSimpleDialog
->>>>>>> origin/master
 
 ##################################################################
 ## Igra
@@ -20,6 +17,8 @@ ni_konec = "ni konec"
 
 clovek = "človek"
 pc = "računalnik"
+
+tezavnost = 6
 
 class MyDialog(tkSimpleDialog.Dialog):
 
@@ -47,8 +46,7 @@ class MyDialog(tkSimpleDialog.Dialog):
         pc1 = str(self.e1.get())
         pc2 = str(self.e2.get())
         self.names = [c1,c2,pc1,pc2]
-        
-
+     
 
 
 class Igra():
@@ -130,12 +128,8 @@ class PC():
         
     def igraj(self):
         
-<<<<<<< HEAD
         a=self.strategija(tezavnost)        
         #print(a,self.ime)
-=======
-        a=self.strategija() 
->>>>>>> origin/master
         self.gui.izvrsi_potezo(a[0],a[1])
         
     def strategija(self,tezavnost=6):
@@ -191,7 +185,7 @@ class PC():
                     if self.gui.igra.veljavne_poteze()[i][1]!=[]:
                         q=i
                     break
-                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])
+                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]
         else:
             slucaj = randint(1,2)
             if slucaj==1:
@@ -202,7 +196,7 @@ class PC():
                     if self.gui.igra.veljavne_poteze()[i][1]!=[]:
                         q=i
                     break
-                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])       
+                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]       
                 
             
     def klik(self, i,j):
@@ -241,9 +235,7 @@ class upvmesnik():
         names_menu = Menu(menu)
         menu.add_cascade(label="Imena igralcev",menu=names_menu)
         names_menu.add_command(label="Doloci imena igralcev", command=self.imena)
-
-
-
+      
         # Napis, ki prikazuje stanje igre
         self.napis = StringVar(master, value="Dobrodošli v igri Nim")
         Label(master, textvariable=self.napis).grid(row=0, column=0)
@@ -258,8 +250,7 @@ class upvmesnik():
 
         # Začne igro v načinu človek proti človeku
         self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
-
-    
+        
     def imena(self):
         self.okno=MyDialog(self.master)
         self.master.wait_window(self.okno)
@@ -268,6 +259,7 @@ class upvmesnik():
         self.ime_c2 = k.names[1]
         self.ime_pc1 = k.names[2]
         self.ime_pc2 = k.names[3]
+    
     
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
