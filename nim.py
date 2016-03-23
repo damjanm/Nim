@@ -1,5 +1,5 @@
 from tkinter import *
-
+from random import *
 
 ##################################################################
 ## Igra
@@ -99,13 +99,13 @@ class PC():
         
     def igraj(self):
         
-        a=self.strategija()        
+        a=self.strategija(tezavnost)        
         #print(a,self.ime)
         self.gui.izvrsi_potezo(a[0],a[1])
         
-    def strategija(self):
+    def strategija(self,tezavnost=6):
         """Vrni seznam z vrstico iz katere bomo vzeli vse vzigalice od vzig desno"""
-
+        
         
         # Najprej naredimo operacijo XOR (exlusive or) po vseh stevilah vzigalic in rezultat shranimo kot xor:        
         xor=self.gui.igra.plosca[0]
@@ -140,8 +140,35 @@ class PC():
                 if st_enk%2!=1:
                     vzig = 1
                 else:
-                    vzig = 0    
-        return [vrst,vzig] 
+                    vzig = 0
+
+
+        #Težavnost: če je enaka 6 igra normalno, če je enaka 4 slučajno igra z verjetnostjo 1/3 in pravilno z verj. 2/3, če je 2 igra slučajno z verj. 1/2                      
+        if tezavnost == 6:
+            return [vrst,vzig]
+        elif tezavnost == 4:
+            slucaj = randint(1,3)
+            if slucaj!=1:
+                return [vrst,vzig]
+            else:
+                q=0
+                for i in range(st_vrstic):
+                    if self.gui.igra.veljavne_poteze()[i][1]!=[]:
+                        q=i
+                    break
+                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])
+        else:
+            slucaj = randint(1,2)
+            if slucaj==1:
+                return [vrst,vzig]
+            else:
+                q=0
+                for i in range(st_vrstic):
+                    if self.gui.igra.veljavne_poteze()[i][1]!=[]:
+                        q=i
+                    break
+                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])       
+                
             
     def klik(self, i,j):
         pass # Računalnik bo ignoriral klike
