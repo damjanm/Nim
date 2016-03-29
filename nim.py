@@ -30,22 +30,27 @@ class MyDialog(tkSimpleDialog.Dialog):
         Label(master, text="Računalnik 2:").grid(row=3)
 
         self.e1 = Entry(master)
+        self.e1.insert(END, 'Clovek 1')
         self.e2 = Entry(master)
+        self.e2.insert(END, 'Clovek 2')
         self.e3 = Entry(master)
+        self.e3.insert(END, 'Racunalnik 1')
         self.e4 = Entry(master)
+        self.e4.insert(END, 'Racunalnik 2')
 
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
         self.e3.grid(row=2, column=1)
         self.e4.grid(row=3, column=1)
-        #return self.e1 # initial focus
+        return self.e1
 
     def apply(self):
         c1 = str(self.e1.get())
         c2 = str(self.e2.get())
-        pc1 = str(self.e1.get())
-        pc2 = str(self.e2.get())
-        self.names = [c1,c2,pc1,pc2]
+        pc1 = str(self.e3.get())
+        pc2 = str(self.e4.get())
+        self.imen = [c1,c2,pc1,pc2]
+        
      
 
 
@@ -122,17 +127,18 @@ class Clovek():
 ## Igralec računalnik
 
 class PC():
-    def __init__(self, gui, ime):
+    def __init__(self, gui, ime, tez):
         self.gui = gui
         self.ime= ime
+        self.tez=tez
         
     def igraj(self):
         
-        a=self.strategija(tezavnost)        
+        a=self.strategija(self.tez)        
         #print(a,self.ime)
         self.gui.izvrsi_potezo(a[0],a[1])
         
-    def strategija(self,tezavnost=6):
+    def strategija(self,tezavnost):
         """Vrni seznam z vrstico iz katere bomo vzeli vse vzigalice od vzig desno"""
         
         
@@ -184,7 +190,7 @@ class PC():
                 for i in range(st_vrstic):
                     if self.gui.igra.veljavne_poteze()[i][1]!=[]:
                         q=i
-                    break
+                        break
                 return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]
         else:
             slucaj = randint(1,2)
@@ -195,7 +201,7 @@ class PC():
                 for i in range(st_vrstic):
                     if self.gui.igra.veljavne_poteze()[i][1]!=[]:
                         q=i
-                    break
+                        break
                 return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]       
                 
             
@@ -227,9 +233,15 @@ class upvmesnik():
         player_menu.add_cascade(label="Računalnik proti človeku", menu=menu_pc_c)
         player_menu.add_cascade(label="Računalnik proti računalniku", menu=menu_pc_pc)
 
-        menu_c_pc.add_command(label="Težko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2)))
-        menu_pc_c.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1),Clovek(self,self.ime_c2)))
-        menu_pc_pc.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1),PC(self,self.ime_pc2)))
+        menu_c_pc.add_command(label="Lahko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,2)))
+        menu_c_pc.add_command(label="Srednje", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,4)))
+        menu_c_pc.add_command(label="Težko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,6)))
+        menu_pc_c.add_command(label="Lahko", command=lambda:self.start_game(PC(self,self.ime_pc1,2),Clovek(self,self.ime_c2)))
+        menu_pc_c.add_command(label="Srednje", command=lambda:self.start_game(PC(self,self.ime_pc1,4),Clovek(self,self.ime_c2)))
+        menu_pc_c.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1,6),Clovek(self,self.ime_c2)))
+        menu_pc_pc.add_command(label="Lahko", command=lambda:self.start_game(PC(self,self.ime_pc1,2),PC(self,self.ime_pc2,2)))
+        menu_pc_pc.add_command(label="Srednje", command=lambda:self.start_game(PC(self,self.ime_pc1,4),PC(self,self.ime_pc2,4)))
+        menu_pc_pc.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1,6),PC(self,self.ime_pc2,6)))
 
 
         names_menu = Menu(menu)
@@ -238,10 +250,10 @@ class upvmesnik():
       
         # Napis, ki prikazuje stanje igre
         self.napis = StringVar(master, value="Dobrodošli v igri Nim")
-        Label(master, textvariable=self.napis).grid(row=0, column=0)
+        Label(master, textvariable=self.napis,fg = "dark green",font=("Times",20,"bold italic")).grid(row=0, column=0)
 
         # Ustvarimo igralno ploščo
-        self.plosca = Canvas(master, width = 50*max(st_vzigalic_po_vrsticah)+50, height = 100*st_vrstic+50)
+        self.plosca = Canvas(master, width = 50*max(st_vzigalic_po_vrsticah)+50, height = 100*st_vrstic+50,bg="papaya whip")
         self.plosca.grid()
 
         
@@ -252,13 +264,13 @@ class upvmesnik():
         self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
         
     def imena(self):
-        self.okno=MyDialog(self.master)
-        self.master.wait_window(self.okno)
-        k=self.okno.apply
-        self.ime_c1 = k.names[0]
-        self.ime_c2 = k.names[1]
-        self.ime_pc1 = k.names[2]
-        self.ime_pc2 = k.names[3]
+        okno=MyDialog(self.master)        
+        k=okno.imen
+        self.ime_c1 = k[0]
+        self.ime_c2 = k[1]
+        self.ime_pc1 = k[2]
+        self.ime_pc2 = k[3]
+        
     
     
     def start_game(self, igralec_1, igralec_2):
@@ -272,7 +284,7 @@ class upvmesnik():
             k=0
             sez2=list()
             for j in range(st_vzigalic_po_vrsticah[i]):
-                i1=self.plosca.create_rectangle(k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)-2,50*(i+1)+m,k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)+2,50*(i+1)+m+50, fill= "gray")
+                i1=self.plosca.create_rectangle(k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)-2,50*(i+1)+m,k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)+2,50*(i+1)+m+50, fill= "orange red")
                 sez2.append(i1)
                 k+=50
             m+=50
@@ -289,7 +301,10 @@ class upvmesnik():
         # Človek je prvi na potezi
         self.napis.set("Na potezi je {0}".format(self.prvi.ime))
         #self.igralec= self.prvi
-        self.prvi.igraj()
+        if isinstance(self.prvi,PC):
+            self.plosca.after(500,self.prvi.igraj)
+        else:
+            self.prvi.igraj()
 
     def izvrsi_potezo(self, i, j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
@@ -304,7 +319,7 @@ class upvmesnik():
             if self.igra.na_potezi==self.prvi:                
                 self.plosca.after(500,self.prvi.igraj)
             else:
-                self.plosca.after(500, self.drugi.igraj)
+                self.plosca.after(500,self.drugi.igraj)
             self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
             if self.igra.stanje_igre()!=ni_konec:
                 self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
@@ -334,7 +349,7 @@ class upvmesnik():
     
     def end_game(self,winner):
         self.napis.set("")
-        self.plosca.create_text((self.sredina*50), (100+(st_vrstic//2)*50), fill = "blue", font=("Helvetica",30,"bold"), text = "Zmagal je {0}!".format(winner))
+        self.plosca.create_text((self.sredina*50), (100+(st_vrstic//2)*50), fill = "red4", font=("Times",30,"bold italic"), text = "Zmagal je {0}!".format(winner))
 
 
 
