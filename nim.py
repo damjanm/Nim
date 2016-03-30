@@ -221,13 +221,18 @@ class upvmesnik():
         self.ime_c2 = "Clovek 2"
         self.ime_pc1 = "Računalnik 1"
         self.ime_pc2 = "Računalnik 2"
-        
+        self.undo=[]
+
+        game_menu = Menu(menu)
+        menu.add_cascade(label="Igra", menu=game_menu)
+        game_menu.add_command(label="Razveljavi potezo", command=lambda:self.razveljavi_potezo())
+
         player_menu = Menu(menu)
         menu_c_pc = Menu(player_menu)
         menu_pc_c = Menu(player_menu)
         menu_pc_pc = Menu(player_menu)
         
-        menu.add_cascade(label="Igra", menu=player_menu)
+        menu.add_cascade(label="Igralci", menu=player_menu)
         player_menu.add_command(label="Človek proti človeku", command=lambda:self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2)))
         player_menu.add_cascade(label="Človek proti računalniku", menu=menu_c_pc)
         player_menu.add_cascade(label="Računalnik proti človeku", menu=menu_pc_c)
@@ -305,16 +310,17 @@ class upvmesnik():
             self.plosca.after(500,self.prvi.igraj)
         else:
             self.prvi.igraj()
-
+    
     def izvrsi_potezo(self, i, j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
         if j not in self.igra.veljavne_poteze()[i][1]:
             return None
-        else:            
+        else:
+            self.undo.append([i,j,self.seznam[i][j:]])
             for a in self.seznam[i][j:]: 
                 self.plosca.delete(a)
                 
-            self.seznam[i] = self.seznam[i][:j]         
+            self.seznam[i] = self.seznam[i][:j]
             self.igra.povleci_potezo(i,j)
             if self.igra.na_potezi==self.prvi:                
                 self.plosca.after(500,self.prvi.igraj)
@@ -327,6 +333,24 @@ class upvmesnik():
                 pass
 
 
+    def razveljavi_potezo(self):
+        if isinstance(self.prvi,PC) or isinstance(self.drugi,PC):
+            q=2
+        else:
+            q=1
+        for w in range(0,q):
+            self.igra.razveljavi()
+            undo=self.undo[-1]
+            vrst=undo[0]
+            vzig=undo[1]
+            sezn=list()
+            for j in range(vzig,st_vzigalic_po_vrsticah[vrst]):
+                a=self.plosca.create_rectangle(50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)-2+j*50,50*(vrst+1)+vrst*50,50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)+2+j*50,50*(vrst+1)+vrst*50+50, fill= "orange red")
+                sezn.append(a)
+            self.seznam[vrst].extend(sezn)
+            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))
+            self.undo.pop()
+        
         
     def plosca_klik(self, event):
         vrstica = (event.y-5)//100
