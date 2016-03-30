@@ -30,13 +30,13 @@ class MyDialog(tkSimpleDialog.Dialog):
         Label(master, text="Računalnik 2:").grid(row=3)
 
         self.e1 = Entry(master)
-        self.e1.insert(END, 'Clovek 1')
+        self.e1.insert(END, 'Maja')
         self.e2 = Entry(master)
-        self.e2.insert(END, 'Clovek 2')
+        self.e2.insert(END, 'Damjan')
         self.e3 = Entry(master)
-        self.e3.insert(END, 'Racunalnik 1')
+        self.e3.insert(END, 'Linux')
         self.e4 = Entry(master)
-        self.e4.insert(END, 'Racunalnik 2')
+        self.e4.insert(END, 'Windows')
 
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
@@ -217,10 +217,10 @@ class upvmesnik():
         self.master=master
         menu = Menu(master)
         master.config(menu=menu) # Dodamo glavni meni
-        self.ime_c1 = "Clovek 1"
-        self.ime_c2 = "Clovek 2"
-        self.ime_pc1 = "Računalnik 1"
-        self.ime_pc2 = "Računalnik 2"
+        self.ime_c1 = "Maja"
+        self.ime_c2 = "Damjan"
+        self.ime_pc1 = "Linux"
+        self.ime_pc2 = "Windows"
         self.undo=[]
 
         game_menu = Menu(menu)
@@ -238,12 +238,12 @@ class upvmesnik():
         player_menu.add_cascade(label="Računalnik proti človeku", menu=menu_pc_c)
         player_menu.add_cascade(label="Računalnik proti računalniku", menu=menu_pc_pc)
 
-        menu_c_pc.add_command(label="Lahko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,2)))
-        menu_c_pc.add_command(label="Srednje", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,4)))
-        menu_c_pc.add_command(label="Težko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc2,6)))
-        menu_pc_c.add_command(label="Lahko", command=lambda:self.start_game(PC(self,self.ime_pc1,2),Clovek(self,self.ime_c2)))
-        menu_pc_c.add_command(label="Srednje", command=lambda:self.start_game(PC(self,self.ime_pc1,4),Clovek(self,self.ime_c2)))
-        menu_pc_c.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1,6),Clovek(self,self.ime_c2)))
+        menu_c_pc.add_command(label="Lahko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc1,2)))
+        menu_c_pc.add_command(label="Srednje", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc1,4)))
+        menu_c_pc.add_command(label="Težko", command=lambda:self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc1,6)))
+        menu_pc_c.add_command(label="Lahko", command=lambda:self.start_game(PC(self,self.ime_pc1,2),Clovek(self,self.ime_c1)))
+        menu_pc_c.add_command(label="Srednje", command=lambda:self.start_game(PC(self,self.ime_pc1,4),Clovek(self,self.ime_c1)))
+        menu_pc_c.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1,6),Clovek(self,self.ime_c1)))
         menu_pc_pc.add_command(label="Lahko", command=lambda:self.start_game(PC(self,self.ime_pc1,2),PC(self,self.ime_pc2,2)))
         menu_pc_pc.add_command(label="Srednje", command=lambda:self.start_game(PC(self,self.ime_pc1,4),PC(self,self.ime_pc2,4)))
         menu_pc_pc.add_command(label="Težko", command=lambda:self.start_game(PC(self,self.ime_pc1,6),PC(self,self.ime_pc2,6)))
@@ -266,7 +266,7 @@ class upvmesnik():
         self.plosca.bind("<Button-1>", self.plosca_klik)
 
         # Začne igro v načinu človek proti človeku
-        self.start_game(Clovek(self,"Clovek 1"),Clovek(self,"Clovek 2"))
+        self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2))
         
     def imena(self):
         okno=MyDialog(self.master)        
@@ -275,8 +275,8 @@ class upvmesnik():
         self.ime_c2 = k[1]
         self.ime_pc1 = k[2]
         self.ime_pc2 = k[3]
+
         
-    
     
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
