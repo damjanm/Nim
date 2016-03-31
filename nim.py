@@ -191,6 +191,7 @@ class PC():
                     if self.gui.igra.veljavne_poteze()[i][1]!=[]:
                         q=i
                         break
+                    
                 return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]
         else:
             slucaj = randint(1,2)
@@ -322,15 +323,18 @@ class upvmesnik():
                 
             self.seznam[i] = self.seznam[i][:j]
             self.igra.povleci_potezo(i,j)
+            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
+            if self.igra.stanje_igre()!=ni_konec:
+                self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
+                return
+            else:
+                pass
             if self.igra.na_potezi==self.prvi:                
                 self.plosca.after(500,self.prvi.igraj)
             else:
                 self.plosca.after(500,self.drugi.igraj)
-            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
-            if self.igra.stanje_igre()!=ni_konec:
-                self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
-            else:
-                pass
+            
+
 
 
     def razveljavi_potezo(self):
