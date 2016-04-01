@@ -266,6 +266,9 @@ class upvmesnik():
         # Igranje človeka bo upravljano s klikom
         self.plosca.bind("<Button-1>", self.plosca_klik)
 
+        #vžigalice se osvetlijo ko se miška premakne na njih
+        self.plosca.bind("<Motion>", self.osvetli)
+
         # Začne igro v načinu človek proti človeku
         self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2))
         
@@ -373,6 +376,23 @@ class upvmesnik():
         else:
             self.drugi.klik(vrstica,vzigalica)
         
+
+    def osvetli(self,event):
+        for i in range(len(self.seznam)):
+            for j in self.seznam[i]:
+                self.plosca.itemconfig(j, fill="orange red")
+        vrstica = (event.y-5)//100
+        vzigalica = (event.x+5-50*(4-vrstica))//50 
+        if 5<event.y%100<45:
+            return
+        if 5<(event.x-50*(4-vrstica))%50<45:
+            return        
+        if vrstica <0 or vrstica >=st_vrstic:
+            return
+        if vzigalica <0 or vzigalica >= self.igra.plosca[vrstica]:
+            return
+        for j in self.seznam[vrstica][vzigalica:]:
+            self.plosca.itemconfig(j, fill="papaya whip")
         
     
     def end_game(self,winner):
