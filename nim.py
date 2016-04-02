@@ -12,21 +12,21 @@ ni_konec = "ni konec"
 
 class MyDialog(tkSimpleDialog.Dialog):
 
-    def body(self, master):
-        
+    def body(self, master, gui):
+        self.gui = gui
         Label(master, text="Človek 1:").grid(row=0)
         Label(master, text="Človek 2").grid(row=1)
         Label(master, text="Računalnik 1:").grid(row=2)
         Label(master, text="Računalnik 2:").grid(row=3)
 
         self.e1 = Entry(master)
-        self.e1.insert(END, 'Maja')
+        self.e1.insert(END, self.gui.ime_c1)
         self.e2 = Entry(master)
-        self.e2.insert(END, 'Damjan')
+        self.e2.insert(END, self.gui.ime_c2)
         self.e3 = Entry(master)
-        self.e3.insert(END, 'Linux')
+        self.e3.insert(END, self.gui.ime_pc1)
         self.e4 = Entry(master)
-        self.e4.insert(END, 'Windows')
+        self.e4.insert(END, self.gui.ime_pc2)
 
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
@@ -253,12 +253,28 @@ class upvmesnik():
         self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2))
         
     def imena(self):
-        okno=MyDialog(self.master)        
+        okno=MyDialog(self.master, self)        
         k=okno.imen
         self.ime_c1 = k[0]
         self.ime_c2 = k[1]
         self.ime_pc1 = k[2]
         self.ime_pc2 = k[3]
+        okno.e1 = self.ime_c1
+        okno.e2 = self.ime_c2
+        okno.e3 = self.ime_pc1
+        okno.e4 = self.ime_pc2
+        if isinstance(self.prvi,Clovek):
+            if isinstance(self.drugi,PC):
+                self.start_game(Clovek(self,self.ime_c1),PC(self,self.ime_pc1,self.t))
+            else:
+                self.start_game(Clovek(self,self.ime_c1),Clovek(self,self.ime_c2))
+        else:
+            if isinstance(self.drugi,PC):
+                self.start_game(PC(self,self.ime_pc1,self.t),PC(self,self.ime_pc2,self.t2))
+            else:
+                self.start_game(PC(self,self.ime_pc1,self.t),Clovek(self,self.ime_c1))
+
+        
           
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
@@ -290,6 +306,15 @@ class upvmesnik():
         self.prvi = igralec_1
         self.drugi = igralec_2
 
+        # Shranimo težavnost
+        if isinstance(self.prvi,PC):
+            self.t = self.prvi.tez
+            if isinstance(self.drugi,PC):
+                self.t2 = self.drugi.tez
+        else:
+            if isinstance(self.drugi,PC):
+                self.t = self.drugi.tez
+                
         # Človek je prvi na potezi
         self.napis.set("Na potezi je {0}".format(self.prvi.ime))
         if isinstance(self.prvi,PC):
