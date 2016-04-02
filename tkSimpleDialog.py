@@ -3,7 +3,7 @@ import os
 
 class Dialog(Toplevel):
 
-    def __init__(self, parent, title = None):
+    def __init__(self, parent, gui, title = None):
 
         Toplevel.__init__(self, parent)
         self.transient(parent)
@@ -12,11 +12,11 @@ class Dialog(Toplevel):
             self.title(title)
 
         self.parent = parent
-
+        self.gui = gui
         self.result = None
 
         body = Frame(self)
-        self.initial_focus = self.body(body)
+        self.initial_focus = self.body(body, gui)
         body.pack(padx=5, pady=5)
 
         self.buttonbox()
@@ -38,7 +38,7 @@ class Dialog(Toplevel):
     #
     # construction hooks
 
-    def body(self, master):
+    def body(self, master, gui):
         # create dialog body.  return widget that should have
         # initial focus.  this method should be overridden
 
@@ -68,18 +68,18 @@ class Dialog(Toplevel):
         if not self.validate():
             self.initial_focus.focus_set() # put focus back
             return
-
         self.withdraw()
         self.update_idletasks()
 
         self.apply()
 
-        self.cancel()
+        self.destroy()
 
     def cancel(self, event=None):
 
         # put focus back to the parent window
         self.parent.focus_set()
+        self.imen = [self.gui.ime_c1, self.gui.ime_c2, self.gui.ime_pc1, self.gui.ime_pc2]
         self.destroy()
 
     #
