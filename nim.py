@@ -8,17 +8,7 @@ import tkSimpleDialog
 st_vzigalic_po_vrsticah = [1,3,5,7]
 st_vrstic = len(st_vzigalic_po_vrsticah)
 
-#igralci:
-igralec_i = "Človek 1"
-igralec_ii = "Človek 2"
-
 ni_konec = "ni konec"
-
-
-clovek = "človek"
-pc = "računalnik"
-
-tezavnost = 6
 
 class MyDialog(tkSimpleDialog.Dialog):
 
@@ -56,14 +46,14 @@ class MyDialog(tkSimpleDialog.Dialog):
 
 class Igra():
     def __init__(self,igralec_1,igralec_2):
-        self.plosca=st_vzigalic_po_vrsticah[:]
-        self.na_potezi =  igralec_1
-        self.igralec_1 =  igralec_1
-        self.igralec_2 =  igralec_2
+        self.plosca = st_vzigalic_po_vrsticah[:]
+        self.na_potezi = igralec_1
+        self.igralec_1 = igralec_1
+        self.igralec_2 = igralec_2
         self.zgodovina = [] # Zgodovino bomo rabili, da bi shranjevali kateri igralec je naredil ustrezno potezo.
         
     def shrani_pozicijo(self):
-        self.zgodovina.append((self.plosca[:],self.na_potezi)) # Shranimo q in ne self.plosca, ker se self.plosca ves cas spreminja
+        self.zgodovina.append((self.plosca[:],self.na_potezi)) 
         
     def razveljavi(self):
         (self.plosca, self.na_potezi) = self.zgodovina.pop()
@@ -78,12 +68,18 @@ class Igra():
         # Vrne nam seznam z vsemi moznimi potezi na vsaki vrstici
         poteze = []
         for i in range(len(self.plosca)):
-            poteze.append([i,list(range(self.plosca[i]))]) 
+            for j in range(self.plosca[i]):
+                poteze.append((i,j))            
         return poteze
 
     def povleci_potezo(self,i,j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        if j not in self.veljavne_poteze()[i][1]:
+        stevec = 0
+        for (a1,a2) in self.veljavne_poteze():
+            if a1 == i and a2 == j:
+                stevec += 1
+                break
+        if stevec == 0:
             return None
         else:
             self.shrani_pozicijo()
@@ -94,18 +90,13 @@ class Igra():
            
     def stanje_igre(self):
         """Ugotovi, kakšno je stanje in vrne:
-        -igralec_i, ce je zmagal prvi igralec
-        -igralec_ii, ce je zmagal drugi igralec
-        -ni_konec, ce igre se ni konec
+        -ni_konec, če igre še ni konec
+        -Igralec, če igre še ni konec
         """
         if self.plosca != [0]*len(self.plosca):
             return(ni_konec)
         else:
-            if self.zgodovina[len(self.zgodovina)-1][1]==igralec_i:
-                return(igralec_ii)
-            if self.zgodovina[len(self.zgodovina)-1][1]==igralec_ii:
-                return(igralec_i)
-            
+            return("Igralec")
 
 ##################################################################
 ## Igralec človek
@@ -135,11 +126,10 @@ class PC():
     def igraj(self):
         
         a=self.strategija(self.tez)        
-        #print(a,self.ime)
         self.gui.izvrsi_potezo(a[0],a[1])
         
     def strategija(self,tezavnost):
-        """Vrni seznam z vrstico iz katere bomo vzeli vse vzigalice od vzig desno"""
+        """Vrni vrstico in vzigalico od katere bomo vzeli vse vzigalice desno"""
         
         
         # Najprej naredimo operacijo XOR (exlusive or) po vseh stevilah vzigalic in rezultat shranimo kot xor:        
@@ -158,7 +148,7 @@ class PC():
             vzig = self.gui.igra.plosca[vrst]^xor
             
             #S tem smo dolocili vrstico iz katere moramo vzeti ustrezno stevilo vzigalic.
-            #Sedaj še popravimo strategijo v primeru, ko imamo po eno vžigalico v vsaki vrstici (ali pa je v maksimum eno vrstico več kot 1 vžigalica).
+            #Sedaj popravimo še strategijo v primeru, ko imamo eno vžigalico v vsaki vrstici.
             #Naredimo tak korak, da bo ostalo liho število vrstic, kjer vsaka vrstica bo imela 1 vžigalico
             
             st=0
@@ -178,33 +168,24 @@ class PC():
                     vzig = 0
 
 
-        #Težavnost: če je enaka 6 igra normalno, če je enaka 4 slučajno igra z verjetnostjo 1/3 in pravilno z verj. 2/3, če je 2 igra slučajno z verj. 1/2                      
+        #Težavnost: če je enaka 6 igra normalno, če je enaka 4 slučajno igra z verjetnostjo 1/3 in pravilno z verj. 2/3, če je enaka 2 igra slučajno z verj. 1/2                      
         if tezavnost == 6:
             return [vrst,vzig]
-        elif tezavnost == 4:
+        else:
+            
+            return self.pomozna_strategija(tezavnost, vrst, vzig)
+                
+    def pomozna_strategija(self,tezavnost, vrst, vzig):
+        if tezavnost == 4:
             slucaj = randint(1,3)
-            if slucaj!=1:
-                return [vrst,vzig]
-            else:
-                q=0
-                for i in range(st_vrstic):
-                    if self.gui.igra.veljavne_poteze()[i][1]!=[]:
-                        q=i
-                        break
-                    
-                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]
         else:
             slucaj = randint(1,2)
-            if slucaj==1:
-                return [vrst,vzig]
-            else:
-                q=0
-                for i in range(st_vrstic):
-                    if self.gui.igra.veljavne_poteze()[i][1]!=[]:
-                        q=i
-                        break
-                return [q, randint(0,self.gui.igra.veljavne_poteze()[q][1][-1])]       
-                
+            
+        if slucaj != 1:
+            return [vrst, vzig]
+        else:
+            slucaj_1 = randint(0,len(self.gui.igra.veljavne_poteze())-1)
+            return self.gui.igra.veljavne_poteze()[slucaj_1]                    
             
     def klik(self, i,j):
         pass # Računalnik bo ignoriral klike
@@ -262,7 +243,6 @@ class upvmesnik():
         self.plosca = Canvas(master, width = 50*max(st_vzigalic_po_vrsticah)+50, height = 100*st_vrstic+50,bg="papaya whip")
         self.plosca.grid()
 
-        
         # Igranje človeka bo upravljano s klikom
         self.plosca.bind("<Button-1>", self.plosca_klik)
 
@@ -279,29 +259,32 @@ class upvmesnik():
         self.ime_c2 = k[1]
         self.ime_pc1 = k[2]
         self.ime_pc2 = k[3]
-
-        
-    
+          
     def start_game(self, igralec_1, igralec_2):
         # Pobrišemo platno
         self.plosca.delete(ALL)
         m=0
         sez1=list()
         # Narišemo vžigalice
-        self.sredina=(max(st_vzigalic_po_vrsticah)+1)//2
+        self.sredina=((max(st_vzigalic_po_vrsticah)+1)//2)
         for i in range(st_vrstic):
-            k=0
+            k = 0
             sez2=list()
+            if (st_vzigalic_po_vrsticah[i])%2 == 0:
+                l=25
+            else:
+                l=0
             for j in range(st_vzigalic_po_vrsticah[i]):
-                i1=self.plosca.create_rectangle(k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)-2,50*(i+1)+m,k+50*(self.sredina-i-min(st_vzigalic_po_vrsticah)//2)+2,50*(i+1)+m+50, fill= "orange red")
+                v = st_vzigalic_po_vrsticah[i]//2
+                i1 = self.plosca.create_rectangle(50*(self.sredina-v)+k+l-2, 50*(i+1)+m, 50*(self.sredina-v)+k+l+2, 50*(i+1)+m+50, fill= "orange red")
                 sez2.append(i1)
-                k+=50
-            m+=50
+                k += 50
+            m += 50
             sez1.append(sez2)
-        self.seznam=sez1   
+        self.seznam=sez1
         
         # Ustvarimo novo igro
-        self.igra=Igra(igralec_1,igralec_2)
+        self.igra = Igra(igralec_1,igralec_2)
         
         # Nastavimo igralca
         self.prvi = igralec_1
@@ -309,7 +292,6 @@ class upvmesnik():
 
         # Človek je prvi na potezi
         self.napis.set("Na potezi je {0}".format(self.prvi.ime))
-        #self.igralec= self.prvi
         if isinstance(self.prvi,PC):
             self.plosca.after(500,self.prvi.igraj)
         else:
@@ -317,30 +299,34 @@ class upvmesnik():
     
     def izvrsi_potezo(self, i, j):
         # Igralec bo vzel vse vžigalice od j-te desno, vključno z j-to iz i-te vrstice
-        if j not in self.igra.veljavne_poteze()[i][1]:
+        stevec = 0
+        for (a1,a2) in self.igra.veljavne_poteze():
+            if a1 == i and a2 == j:
+                stevec += 1
+                break
+        if stevec == 0:
             return None
         else:
             self.undo.append([i,j,self.seznam[i][j:]])
             for a in self.seznam[i][j:]: 
-                self.plosca.delete(a)
-                
+                self.plosca.delete(a)                
             self.seznam[i] = self.seznam[i][:j]
             self.igra.povleci_potezo(i,j)
-            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))#self.igra.nasprotnik(self.igra.zgodovina[len(self.igra.zgodovina)-1][1]).ime))
-            if self.igra.stanje_igre()!=ni_konec:
+            self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))
+            if self.igra.stanje_igre() != ni_konec:
                 self.end_game(self.igra.nasprotnik(self.igra.na_potezi).ime)
                 return
-            else:
-                pass
             if self.igra.na_potezi==self.prvi:                
                 self.plosca.after(500,self.prvi.igraj)
             else:
                 self.plosca.after(500,self.drugi.igraj)
             
 
-
-
     def razveljavi_potezo(self):
+        if self.igra.zgodovina==[]:
+            return
+        if self.igra.stanje_igre() != ni_konec:
+            self.plosca.delete("brisi")        
         if isinstance(self.prvi,PC) or isinstance(self.drugi,PC):
             q=2
         else:
@@ -351,8 +337,10 @@ class upvmesnik():
             vrst=undo[0]
             vzig=undo[1]
             sezn=list()
-            for j in range(vzig,st_vzigalic_po_vrsticah[vrst]):
-                a=self.plosca.create_rectangle(50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)-2+j*50,50*(vrst+1)+vrst*50,50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)+2+j*50,50*(vrst+1)+vrst*50+50, fill= "orange red")
+            for j in range(vzig,self.igra.plosca[vrst]):
+                a=self.plosca.create_rectangle(50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)-2+j*50,
+                                               50*(vrst+1)+vrst*50,50*(self.sredina-vrst-min(st_vzigalic_po_vrsticah)//2)+2+j*50,
+                                               50*(vrst+1)+vrst*50+50, fill= "orange red")
                 sezn.append(a)
             self.seznam[vrst].extend(sezn)
             self.napis.set("Na potezi je {0}".format(self.igra.na_potezi.ime))
@@ -362,7 +350,7 @@ class upvmesnik():
     def plosca_klik(self, event):
         vrstica = (event.y-5)//100
         vzigalica = (event.x+5-50*(4-vrstica))//50 
-        if 5<event.y%100<45:
+        if 4<(event.y)%100<45:
             return
         if 5<(event.x-50*(4-vrstica))%50<45:
             return        
@@ -370,7 +358,6 @@ class upvmesnik():
             return
         if vzigalica <0 or vzigalica >= self.igra.plosca[vrstica]:
             return
-        
         if self.igra.na_potezi==self.prvi:
             self.prvi.klik(vrstica,vzigalica)            
         else:
@@ -383,7 +370,7 @@ class upvmesnik():
                 self.plosca.itemconfig(j, fill="orange red")
         vrstica = (event.y-5)//100
         vzigalica = (event.x+5-50*(4-vrstica))//50 
-        if 5<event.y%100<45:
+        if 4<event.y%100<45:
             return
         if 5<(event.x-50*(4-vrstica))%50<45:
             return        
@@ -397,7 +384,7 @@ class upvmesnik():
     
     def end_game(self,winner):
         self.napis.set("")
-        self.plosca.create_text((self.sredina*50), (100+(st_vrstic//2)*50), fill = "red4", font=("Times",30,"bold italic"), text = "Zmagal je {0}!".format(winner))
+        self.plosca.create_text((self.sredina*50), (100+(st_vrstic//2)*50), fill = "red4", font=("Times",30,"bold italic"), text = "Zmagal je {0}!".format(winner),tag="brisi")
 
 
 
